@@ -64,7 +64,7 @@ def main():
 
     print(datetime.now(), 'number of users, items in train...', len(pos_users), len(pos_items))
 
-    sampler_cache = _PREFIX + "cached_sampler.pkl"
+    sampler_cache = args.data + '/' + _PREFIX + "cached_sampler.pkl"
     with open(sampler_cache, "wb") as f:
         pickle.dump([sampler, pos_users, pos_items], f, pickle.HIGHEST_PROTOCOL)
 

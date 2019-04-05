@@ -16,7 +16,7 @@ seed=${1:-1}
 USER_MUL=${USER_MUL:-16}
 ITEM_MUL=${ITEM_MUL:-32}
 
-DATASET_DIR=${BASEDIR}/${DATASET}x${USER_MUL}x${ITEM_MUL}
+DATASET_DIR=${BASEDIR}/${DATASET}x${USER_MUL}x${ITEM_MUL}_at
 
 if [ -d ${DATASET_DIR} ]
 then
@@ -26,8 +26,8 @@ then
     echo "STARTING TIMING RUN AT $start_fmt"
 
 	python ncf.py ${DATASET_DIR} \
-        -l 0.0002 \
-        -b 65536 \
+        -l 0.00002 \
+        -b 1048576 \
         --layers 256 256 128 64 \
         -f 64 \
 		--seed $seed \

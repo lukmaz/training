@@ -171,7 +171,7 @@ def main():
                 + '_' + str(chunk) + '.npz', encoding='bytes')['arr_0'])
         
 
-    sampler_cache = '16x32_cached_sampler.pkl'
+    sampler_cache = args.data + '/' + '16x32_cached_sampler.pkl'
     print("New ratings loaded.", datetime.now())
     if os.path.exists(args.data):
       print("Using alias file: {}".format(args.data))
