@@ -5,6 +5,9 @@ import time
 from datetime import datetime
 from collections import OrderedDict
 from argparse import ArgumentParser
+from alias_generator import AliasSample
+import pickle
+from convert import generate_negatives
 
 import tqdm
 import numpy as np
@@ -15,8 +18,6 @@ import utils
 from neumf import NeuMF
 
 from mlperf_compliance import mlperf_log
-
-from negative_sampling import NegativeSampler
 
 def parse_args():
     parser = ArgumentParser(description="Train a Nerual Collaborative"
@@ -169,14 +170,20 @@ def main():
                 + str(args.user_scaling) + 'x' + str(args.item_scaling) 
                 + '_' + str(chunk) + '.npz', encoding='bytes')['arr_0'])
         
+
+    sampler_cache = '16x32_cached_sampler.pkl'
     print("New ratings loaded.", datetime.now())
+    if os.path.exists(args.data):
+      print("Using alias file: {}".format(args.data))
+      with open(sampler_cache, "rb") as f:
+        sampler, pos_users, pos_items = pickle.load(f)
+    print("Alias table loaded.", datetime.now())
 
 
     # get input data
     # get dims
-    nb_maxs = torch.max(train_ratings, 0)[0]
-    nb_users = nb_maxs[0].item()+1
-    nb_items = nb_maxs[1].item()+1
+    nb_users = np.count_nonzero(np.unique(train_ratings[:, 0]))
+    nb_items = np.count_nonzero(np.unique(train_ratings[:, 1]))
     train_users = train_ratings[:,0]
     train_items = train_ratings[:,1]
     del nb_maxs
@@ -197,23 +204,25 @@ def main():
     test_users = [l[:,0] for l in test_ratings]
     test_pos = [l[:,1].reshape(-1,1) for l in test_ratings]
 
-    sampler = NegativeSampler(train_ratings, nb_users, nb_items)
+    # sampler = NegativeSampler(train_ratings, nb_users, nb_items)
+
     del train_ratings
     print("Test negatives creating...", datetime.now())
 
     test_negatives = [torch.LongTensor()] * args.user_scaling
+    test_neg_users = [torch.LongTensor()] * args.user_scaling
+    test_neg_items = [torch.LongTensor()] * args.user_scaling
     
     for chunk in range(args.user_scaling):
         file_name = (args.data + '/test_negx' + str(args.user_scaling) + 'x'
                 + str(args.item_scaling) + '_' + str(chunk) + '.npz')
-        test_negatives[chunk] = torch.from_numpy(np.load(file_name, encoding='bytes')['arr_0'])
+        n = np.load(file_name, encoding='bytes')
+        test_negatives[chunk] = torch.from_numpy(np.concatenate(n.f.arr_0))
+        print('Test negatives:', chunk, test_negatives[chunk].size())
 
-    
     print("Test negatives created.", datetime.now())
     test_neg_users = [l[:, 0] for l in test_negatives]
     test_neg_items = [l[:, 1] for l in test_negatives]
-
-
 
     #test_negs = test_negs.cuda()
     # create items with real sample at last position
@@ -324,7 +333,11 @@ def main():
             neg_users = train_users.repeat(args.negative_samples)
             neg_items = torch.empty_like(neg_users, dtype=torch.int64).random_(0, nb_items)
         else:
-            negatives = sampler.generate_train(args.negative_samples)
+            # negatives = sampler.generate_train(args.negative_samples)
+            negatives = generate_negatives(
+                sampler,
+                args.negative_samples,
+                train_users)
             neg_users = negatives[:, 0]
             neg_items = negatives[:, 1]
 
