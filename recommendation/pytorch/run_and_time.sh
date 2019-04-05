@@ -1,6 +1,6 @@
 #!/bin/bash
 set -e
-
+set -x
 # runs benchmark and reports time to convergence
 # to use the script:
 #   run_and_time.sh <random seed 1-5>
@@ -16,9 +16,17 @@ seed=${1:-1}
 USER_MUL=${USER_MUL:-16}
 ITEM_MUL=${ITEM_MUL:-32}
 
-ALIAS_TABLE=${ALIAS_TABLE:-''}
+ALIAS_TABLE=${ALIAS_TABLE:-'_at'}
+
+LR=${LR:-0.00002}
+BS=${BS:-1048576}
+BETA1=${BETA1:-0.9}
+BETA2=${BETA2:-0.999}
 
 DATASET_DIR=${BASEDIR}/${DATASET}x${USER_MUL}x${ITEM_MUL}${ALIAS_TABLE}
+
+# subdirectory
+DATASET_DIR=${DATASET_DIR}/${DATASET}x${USER_MUL}x${ITEM_MUL}${ALIAS_TABLE}
 
 if [ -d ${DATASET_DIR} ]
 then
@@ -28,8 +36,10 @@ then
     echo "STARTING TIMING RUN AT $start_fmt"
 
 	python ncf.py ${DATASET_DIR} \
-        -l 0.00002 \
-        -b 1048576 \
+        -l ${LR} \
+        -b ${BS} \
+        --beta1 ${BETA1} \
+        --beta2 ${BETA2} \
         --layers 256 256 128 64 \
         -f 64 \
 		--seed $seed \
@@ -55,7 +65,4 @@ else
 	echo "Directory ${DATASET_DIR} does not exist"
 fi
 
-
-
-
-
+set +x
