@@ -182,8 +182,11 @@ def main():
 
     # get input data
     # get dims
-    nb_users = np.count_nonzero(np.unique(train_ratings[:, 0]))
-    nb_items = np.count_nonzero(np.unique(train_ratings[:, 1]))
+    #nb_users = np.count_nonzero(np.unique(train_ratings[:, 0]))
+    #nb_items = np.count_nonzero(np.unique(train_ratings[:, 1]))
+    nb_maxs = torch.max(train_ratings, 0)[0]
+    nb_users = nb_maxs[0].item()+1
+    nb_items = nb_maxs[1].item()+1
     train_users = train_ratings[:,0]
     train_items = train_ratings[:,1]
     del nb_maxs
