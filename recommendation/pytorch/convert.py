@@ -78,7 +78,7 @@ def process_raw_data(args):
           sampler.alias_split_p.dtype))
 
     fn_prefix = CACHE_FN.format(args.user_scaling, args.item_scaling)
-    sampler_cache = fn_prefix + "cached_sampler.pkl"
+    sampler_cache = args.data + '/' + fn_prefix + "cached_sampler.pkl"
     with open(sampler_cache, "wb") as f:
         pickle.dump([sampler, pos_users, pos_items, nb_items, test_chunk_size], f, pickle.HIGHEST_PROTOCOL)
 
