@@ -75,7 +75,7 @@ def savez_two_column(matrix, row_offset, file_name, append=False):
     for item in items:
       tc.append([user, item])
   
-  np.savez_compressed(file_name, np.asarray(tc))
+  np.savez_compressed(file_name, np.asarray(tc, dtype='int32'))
   logging.info("Done saving to file %s.", file_name)
 
 def sorted_product_set(array_a, array_b):
