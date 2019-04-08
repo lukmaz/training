@@ -1,4 +1,5 @@
-ARG FROM_IMAGE_NAME=pytorch/pytorch:1.0.1-cuda10.0-cudnn7-runtime
+#ARG FROM_IMAGE_NAME=pytorch/pytorch:1.0.1-cuda10.0-cudnn7-runtime
+ARG FROM_IMAGE_NAME=nvcr.io/nvidia/pytorch:19.02-py3
 FROM ${FROM_IMAGE_NAME}
 
 # Install Python dependencies
