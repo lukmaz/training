@@ -34,8 +34,7 @@ then
         --threshold $THRESHOLD \
         --user_scaling ${USER_MUL} \
         --item_scaling ${ITEM_MUL} \
-        --cpu_dataloader \
-        --random_negatives
+        --cpu_dataloader
 
 	# end timing
 	end=$(date +%s)
