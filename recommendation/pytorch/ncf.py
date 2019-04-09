@@ -324,7 +324,7 @@ def main():
         
         if args.random_negatives:
             neg_users = train_users.repeat(args.negative_samples)
-            neg_items = torch.empty_like(neg_users, dtype=torch.int64).random_(0, nb_items)
+            neg_items = torch.empty_like(neg_users, dtype=torch.int32).random_(0, nb_items)
         else:
             negatives = generate_negatives(
                 sampler,

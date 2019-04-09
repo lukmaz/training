@@ -21,8 +21,8 @@ ALIAS_TABLE=${ALIAS_TABLE:-'_cache'}
 
 BS=${BS:-65536}
 LR=${LR:-0.0002}
-beta1=${beta1:-0.9}
-beta2=${beta2:-0.999}
+BETA1=${BETA1:-0.9}
+BETA2=${BETA2:-0.999}
 
 DATASET_DIR=${BASEDIR}/${DATASET}x${USER_MUL}x${ITEM_MUL}${ALIAS_TABLE}
 
@@ -37,15 +37,16 @@ then
 	python ncf.py ${DATASET_DIR} \
         -l ${LR} \
         -b ${BS} \
-        --beta1 ${beta1} \
-        --beta2 ${beta2} \
+        --beta1 ${BETA1} \
+        --beta2 ${BETA2} \
         --layers 256 256 128 64 \
         -f 64 \
 		--seed $seed \
         --threshold $THRESHOLD \
         --user_scaling ${USER_MUL} \
         --item_scaling ${ITEM_MUL} \
-        --cpu_dataloader
+        --cpu_dataloader \
+        --random_negatives
 
 	# end timing
 	end=$(date +%s)

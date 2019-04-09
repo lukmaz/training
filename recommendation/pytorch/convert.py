@@ -91,7 +91,7 @@ def main():
       sampler, test_chunk_size = process_raw_data(args)
     else:
       fn_prefix = CACHE_FN.format(args.user_scaling, args.item_scaling)
-      sampler_cache = fn_prefix + "cached_sampler.pkl"
+      sampler_cache = args.data + '/' + fn_prefix + "cached_sampler.pkl"
       print(datetime.now(), "Loading preprocessed sampler.")
       if os.path.exists(args.data):
         print("Using alias file: {}".format(args.data))
