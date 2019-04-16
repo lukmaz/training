@@ -70,6 +70,8 @@ def parse_args():
                         help='do not check train negatives for existence in dataset')
     parser.add_argument('--dropout', type=float, default=0,
                         help='Dropout probability, if equal to 0 will not use dropout at all')
+    parser.add_argument('--l2_reg', type=float, default=0,
+                        help='L2 regularization for the embedding layers')
     return parser.parse_args()
 
 
@@ -381,6 +383,13 @@ def main():
 
             outputs = model(user, item)
             loss = traced_criterion(outputs, label).float()
+
+            # add L2 regularization
+            if args.l2_reg > 0:
+                all_embed_params = torch.cat([x.view(-1) for x in list(model.parameters())[:4]])
+                reg = args.l2_reg * torch.norm(all_embed_params, 2)
+                loss = loss + reg
+
             loss = torch.mean(loss.view(-1), 0)
 
             loss.backward()
