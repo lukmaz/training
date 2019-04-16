@@ -8,7 +8,8 @@ from mlperf_compliance import mlperf_log
 class NeuMF(nn.Module):
     def __init__(self, nb_users, nb_items,
                  mf_dim, mf_reg,
-                 mlp_layer_sizes, mlp_layer_regs):
+                 mlp_layer_sizes, mlp_layer_regs,
+                 dropout=0):
         if len(mlp_layer_sizes) != len(mlp_layer_regs):
             raise RuntimeError('u dummy, layer_sizes != layer_regs!')
         if mlp_layer_sizes[0] % 2 != 0:
@@ -28,6 +29,8 @@ class NeuMF(nn.Module):
         self.mlp = nn.ModuleList()
         for i in range(1, nb_mlp_layers):
             self.mlp.extend([nn.Linear(mlp_layer_sizes[i - 1], mlp_layer_sizes[i])])  # noqa: E501
+            if dropout != 0:
+                self.mlp.extend([nn.Dropout(dropout)])
 
         self.final = nn.Linear(mlp_layer_sizes[-1] + mf_dim, 1)
 
@@ -35,6 +38,7 @@ class NeuMF(nn.Module):
         self.mf_item_embed.weight.data.normal_(0., 0.01)
         self.mlp_user_embed.weight.data.normal_(0., 0.01)
         self.mlp_item_embed.weight.data.normal_(0., 0.01)
+        self.dropout = dropout
 
         def golorot_uniform(layer):
             fan_in, fan_out = layer.in_features, layer.out_features
@@ -61,7 +65,8 @@ class NeuMF(nn.Module):
         xmlp = torch.cat((xmlpu, xmlpi), dim=1)
         for i, layer in enumerate(self.mlp):
             xmlp = layer(xmlp)
-            xmlp = nn.functional.relu(xmlp)
+            if i % 2 == 1:
+                xmlp = nn.functional.relu(xmlp)
 
         x = torch.cat((xmf, xmlp), dim=1)
         x = self.final(x)

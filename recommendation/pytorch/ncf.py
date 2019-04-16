@@ -68,6 +68,8 @@ def parse_args():
                         help='pre-process data on cpu to save memory')
     parser.add_argument('--random_negatives', action='store_true',
                         help='do not check train negatives for existence in dataset')
+    parser.add_argument('--dropout', type=float, default=0,
+                        help='Dropout probability, if equal to 0 will not use dropout at all')
     return parser.parse_args()
 
 
@@ -114,7 +116,8 @@ def val_epoch(model, x, y, dup_mask, real_indices, K, samples_per_user, num_user
         result['NDCG'] = ndcg/num_user
         result['loss'] = loss
         utils.save_result(result, output)
-
+    
+    model.train()
     return hits/num_user, ndcg/num_user
 
 
@@ -125,6 +128,9 @@ def main():
         print("Using seed = {}".format(args.seed))
         torch.manual_seed(args.seed)
         np.random.seed(seed=args.seed)
+
+    if args.dropout != 0:
+        print("Using dropout = {}".format(args.dropout))
 
     # Save configuration to file
     config = {k: v for k, v in args.__dict__.items()}
@@ -263,7 +269,8 @@ def main():
     model = NeuMF(nb_users, nb_items,
                   mf_dim=args.factors, mf_reg=0.,
                   mlp_layer_sizes=args.layers,
-                  mlp_layer_regs=[0. for i in args.layers])
+                  mlp_layer_regs=[0. for i in args.layers],
+                  dropout=args.dropout)
     print(model)
     print("{} parameters".format(utils.count_parameters(model)))
 
