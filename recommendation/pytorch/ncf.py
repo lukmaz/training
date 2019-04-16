@@ -384,13 +384,13 @@ def main():
             outputs = model(user, item)
             loss = traced_criterion(outputs, label).float()
 
+            loss = torch.mean(loss.view(-1), 0)
+            
             # add L2 regularization
             if args.l2_reg > 0:
                 all_embed_params = torch.cat([x.view(-1) for x in list(model.parameters())[:4]])
                 reg = args.l2_reg * torch.norm(all_embed_params, 2)
                 loss = loss + reg
-
-            loss = torch.mean(loss.view(-1), 0)
 
             loss.backward()
             optimizer.step()
