@@ -72,6 +72,8 @@ def parse_args():
                         help='Dropout probability, if equal to 0 will not use dropout at all')
     parser.add_argument('--l2_reg', type=float, default=0,
                         help='L2 regularization for the embedding layers')
+    parser.add_argument('--weight_decay', type=float, default=0,
+                        help='global L2 regularization for all parameters')
     return parser.parse_args()
 
 
@@ -283,7 +285,7 @@ def main():
     # Add optimizer and loss to graph
     params = model.parameters()
 
-    optimizer = torch.optim.Adam(params, lr=args.learning_rate, betas=(args.beta1, args.beta2), eps=args.eps)
+    optimizer = torch.optim.Adam(params, lr=args.learning_rate, betas=(args.beta1, args.beta2), eps=args.eps, weight_decay=args.weight_decay)
     criterion = nn.BCEWithLogitsLoss(reduction = 'none') # use torch.mean() with dim later to avoid copy to host
     mlperf_log.ncf_print(key=mlperf_log.OPT_LR, value=args.learning_rate)
     mlperf_log.ncf_print(key=mlperf_log.OPT_NAME, value="Adam")
